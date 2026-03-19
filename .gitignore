@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+# data/ is tracked only via data/.gitkeep — actual run files are ignored
+data/runs/*.json
+data/validation/*.json
