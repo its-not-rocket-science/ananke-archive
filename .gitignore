@@ -1,6 +1,11 @@
 node_modules/
 dist/
 .env
+*.js.map
+*.d.ts.map
+coverage/
+.DS_Store
+Thumbs.db
 # data/ is tracked only via data/.gitkeep — actual run files are ignored
 data/runs/*.json
 data/validation/*.json
