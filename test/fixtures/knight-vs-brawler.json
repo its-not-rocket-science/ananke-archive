@@ -1,0 +1,43 @@
+{
+  "scenario": "Knight vs Brawler",
+  "seed": 42,
+  "metadata": {
+    "description": "Armoured duelist versus light infantry bruiser"
+  },
+  "initialState": {
+    "tick": 0,
+    "seed": 42,
+    "entities": [
+      { "id": 1, "name": "Knight", "team": 1, "alive": true, "species": "human" },
+      { "id": 2, "name": "Brawler", "team": 2, "alive": true, "species": "human" }
+    ]
+  },
+  "frames": [
+    {
+      "tick": 1,
+      "commands": [
+        [1, [{ "kind": "Move", "targetId": 2, "distance_m": 1.5 }]],
+        [2, [{ "kind": "Move", "targetId": 1, "distance_m": 1.2 }]]
+      ],
+      "snapshot": {
+        "entities": [
+          { "id": 1, "name": "Knight", "team": 1, "alive": true },
+          { "id": 2, "name": "Brawler", "team": 2, "alive": true }
+        ]
+      }
+    },
+    {
+      "tick": 2,
+      "trace": [
+        { "kind": "Hit", "tick": 2, "attackerId": 1, "targetId": 2, "energy_J": 125 },
+        { "kind": "Death", "tick": 2, "entityId": 2 }
+      ],
+      "snapshot": {
+        "entities": [
+          { "id": 1, "name": "Knight", "team": 1, "alive": true },
+          { "id": 2, "name": "Brawler", "team": 2, "alive": false }
+        ]
+      }
+    }
+  ]
+}

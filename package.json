@@ -7,8 +7,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "build": "node --check src/server.js",
-    "test": "node test/server.test.js"
+    "build": "node --check src/server.js && tsc -p tsconfig.json --noEmit",
+    "test": "node test/ingest.test.js && node test/server.test.js",
+    "ingest": "node src/ingest.ts",
+    "bulk-ingest": "node scripts/bulk-ingest.ts"
   },
   "dependencies": {
     "@its-not-rocket-science/ananke": "^0.1.4"
