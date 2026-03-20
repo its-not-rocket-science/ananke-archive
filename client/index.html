@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ananke Archive</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --accent: #8b5cf6;
+      --accent-2: #22c55e;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #334155;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: linear-gradient(180deg, #020617 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.92);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+    h1, h2, h3, p { margin: 0; }
+    header p { color: var(--muted); margin-top: 0.35rem; }
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 520px) 1fr;
+      gap: 1rem;
+      padding: 1rem;
+      min-height: calc(100vh - 100px);
+    }
+    .panel {
+      background: rgba(17, 24, 39, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.3);
+    }
+    .panel-header {
+      padding: 1rem 1rem 0.75rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    }
+    .panel-body { padding: 1rem; }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .filters .full { grid-column: 1 / -1; }
+    label {
+      display: grid;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    input, select, button, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 0.7rem 0.8rem;
+      font: inherit;
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      border: none;
+      font-weight: 700;
+    }
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .button-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .stat {
+      padding: 0.9rem;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+    }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 0.3rem;
+    }
+    .results {
+      max-height: calc(100vh - 360px);
+      overflow: auto;
+    }
+    .run-card {
+      display: grid;
+      gap: 0.55rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      cursor: pointer;
+    }
+    .run-card:hover, .run-card.active {
+      background: rgba(99, 102, 241, 0.12);
+    }
+    .run-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-weight: 700;
+    }
+    .pill-row, .detail-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pill {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #c7f9d4;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+    .detail-grid { margin-top: 1rem; }
+    .detail-item {
+      min-width: 120px;
+      padding: 0.8rem;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .detail-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.3rem;
+    }
+    .empty, .loading, .error {
+      padding: 1rem;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.55);
+      color: var(--muted);
+      margin-top: 0.75rem;
+    }
+    .error { color: #fecaca; border: 1px solid rgba(239, 68, 68, 0.35); }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      border-radius: 14px;
+      padding: 1rem;
+      overflow: auto;
+      max-height: 360px;
+    }
+    .event-list {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1rem;
+      max-height: 320px;
+      overflow: auto;
+    }
+    .event-row {
+      padding: 0.8rem;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(51, 65, 85, 0.55);
+    }
+    .event-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 0.2rem;
+    }
+    a {
+      color: #c4b5fd;
+      text-decoration: none;
+    }
+    @media (max-width: 1080px) {
+      main { grid-template-columns: 1fr; }
+      .results { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ananke Archive</h1>
+    <p>Search replay files by scenario, winner, seed, ticks, and event vocabulary, then inspect the archived run in detail.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Search runs</h2>
+      </div>
+      <div class="panel-body">
+        <div class="filters">
+          <label class="full">API base URL
+            <input id="apiBase" type="url" placeholder="http://localhost:3000">
+          </label>
+          <label class="full">Keyword search
+            <input id="search" type="search" placeholder="knight plague hit death morale...">
+          </label>
+          <label>Scenario
+            <select id="scenarioFilter">
+              <option value="">All scenarios</option>
+            </select>
+          </label>
+          <label>Winner
+            <select id="winnerFilter">
+              <option value="">Any winner</option>
+            </select>
+          </label>
+          <label>Min ticks
+            <input id="minTicks" type="number" min="0" placeholder="0">
+          </label>
+          <label>Max ticks
+            <input id="maxTicks" type="number" min="0" placeholder="600">
+          </label>
+          <label>Seed
+            <input id="seedFilter" type="number" min="0" placeholder="42">
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="searchButton">Refresh search</button>
+          <button id="resetButton" class="secondary">Reset filters</button>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div id="resultsState" class="loading">Ready to load runs…</div>
+        <div id="results" class="results"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Run detail</h2>
+      </div>
+      <div class="panel-body" id="detailPane">
+        <div class="empty">Select a run from the search results to inspect the archived metadata, normalised events, and raw replay payload.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      apiBase: localStorage.getItem("ananke-archive-api") || "http://localhost:3000",
+      runs: [],
+      selectedRunId: null,
+    };
+
+    const elements = {
+      apiBase: document.getElementById("apiBase"),
+      search: document.getElementById("search"),
+      scenarioFilter: document.getElementById("scenarioFilter"),
+      winnerFilter: document.getElementById("winnerFilter"),
+      minTicks: document.getElementById("minTicks"),
+      maxTicks: document.getElementById("maxTicks"),
+      seedFilter: document.getElementById("seedFilter"),
+      searchButton: document.getElementById("searchButton"),
+      resetButton: document.getElementById("resetButton"),
+      results: document.getElementById("results"),
+      resultsState: document.getElementById("resultsState"),
+      detailPane: document.getElementById("detailPane"),
+      stats: document.getElementById("stats"),
+    };
+
+    elements.apiBase.value = state.apiBase;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatPercent(value) {
+      return value === null || value === undefined ? "—" : `${(Number(value) * 100).toFixed(1)}%`;
+    }
+
+    function formatWinner(value) {
+      return value === null || value === undefined || value === "" ? "No decisive winner" : `Winner: ${value}`;
+    }
+
+    function collectFilters() {
+      const params = new URLSearchParams();
+      const map = {
+        q: elements.search.value.trim(),
+        scenario: elements.scenarioFilter.value,
+        winner: elements.winnerFilter.value,
+        minTicks: elements.minTicks.value,
+        maxTicks: elements.maxTicks.value,
+        seed: elements.seedFilter.value,
+      };
+
+      Object.entries(map).forEach(([key, value]) => {
+        if (value !== "") params.set(key, value);
+      });
+
+      return params;
+    }
+
+    function renderStats() {
+      const totalRuns = state.runs.length;
+      const scenarioCount = new Set(state.runs.map((run) => run.metadata?.scenario).filter(Boolean)).size;
+      const avgTicks = totalRuns === 0
+        ? 0
+        : Math.round(state.runs.reduce((sum, run) => sum + (run.metadata?.tickCount || 0), 0) / totalRuns);
+
+      elements.stats.innerHTML = `
+        <div class="stat"><span>Runs</span><strong>${totalRuns}</strong></div>
+        <div class="stat"><span>Scenarios</span><strong>${scenarioCount}</strong></div>
+        <div class="stat"><span>Avg ticks</span><strong>${avgTicks}</strong></div>
+      `;
+    }
+
+    function renderOptions(select, values, placeholder) {
+      const current = select.value;
+      const unique = [...new Set(values.filter((value) => value !== null && value !== undefined && value !== ""))].sort((a, b) => String(a).localeCompare(String(b)));
+      select.innerHTML = `<option value="">${placeholder}</option>` + unique
+        .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+        .join("");
+      if (unique.includes(current)) select.value = current;
+    }
+
+    function renderResults() {
+      renderStats();
+      renderOptions(elements.scenarioFilter, state.runs.map((run) => run.metadata?.scenario), "All scenarios");
+      renderOptions(elements.winnerFilter, state.runs.map((run) => run.metadata?.winnerTeam), "Any winner");
+
+      if (state.runs.length === 0) {
+        elements.results.innerHTML = "";
+        elements.resultsState.className = "empty";
+        elements.resultsState.textContent = "No runs matched the current filters.";
+        return;
+      }
+
+      elements.resultsState.className = "loading";
+      elements.resultsState.textContent = `${state.runs.length} run(s) loaded.`;
+      elements.results.innerHTML = state.runs.map((run) => {
+        const active = run.id === state.selectedRunId ? "active" : "";
+        return `
+          <article class="run-card ${active}" data-run-id="${escapeHtml(run.id)}">
+            <div class="run-title">
+              <span>${escapeHtml(run.metadata.scenario)}</span>
+              <span>#${escapeHtml(run.id.slice(0, 10))}</span>
+            </div>
+            <div class="pill-row">
+              <span class="pill">Seed ${escapeHtml(run.metadata.seed ?? "?")}</span>
+              <span class="pill">${escapeHtml(run.metadata.tickCount)} ticks</span>
+              <span class="pill">${escapeHtml(formatWinner(run.metadata.winnerTeam))}</span>
+            </div>
+            <div class="event-meta">${escapeHtml(run.metadata.eventCount)} events · casualty rate ${escapeHtml(formatPercent(run.metadata.casualtyRate))}</div>
+          </article>
+        `;
+      }).join("");
+
+      elements.results.querySelectorAll("[data-run-id]").forEach((node) => {
+        node.addEventListener("click", () => {
+          state.selectedRunId = node.getAttribute("data-run-id");
+          renderResults();
+          loadRunDetail(state.selectedRunId);
+        });
+      });
+    }
+
+    async function fetchJson(pathname, params = new URLSearchParams()) {
+      const base = elements.apiBase.value.trim().replace(/\/$/, "");
+      state.apiBase = base;
+      localStorage.setItem("ananke-archive-api", base);
+      const url = `${base}${pathname}${params.toString() ? `?${params}` : ""}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`${response.status} ${response.statusText}: ${text}`);
+      }
+      return response.json();
+    }
+
+    async function loadRuns() {
+      elements.resultsState.className = "loading";
+      elements.resultsState.textContent = "Loading archive runs…";
+      try {
+        const payload = await fetchJson("/runs", collectFilters());
+        state.runs = payload.runs || [];
+        if (!state.runs.find((run) => run.id === state.selectedRunId)) {
+          state.selectedRunId = state.runs[0]?.id || null;
+        }
+        renderResults();
+        if (state.selectedRunId) {
+          await loadRunDetail(state.selectedRunId);
+        } else {
+          elements.detailPane.innerHTML = '<div class="empty">Select a run from the search results to inspect the archived metadata, normalised events, and raw replay payload.</div>';
+        }
+      } catch (error) {
+        elements.results.innerHTML = "";
+        elements.stats.innerHTML = "";
+        elements.resultsState.className = "error";
+        elements.resultsState.textContent = `Failed to load runs: ${error.message}`;
+      }
+    }
+
+    function renderDetail(run) {
+      const events = Array.isArray(run.events) ? run.events.slice(0, 100) : [];
+      const metadata = run.metadata || {};
+      const replayLink = `${state.apiBase.replace(/\/$/, "")}/runs/${run.id}/replay`;
+      elements.detailPane.innerHTML = `
+        <h3>${escapeHtml(metadata.scenario || "Unknown scenario")}</h3>
+        <p style="color: var(--muted); margin-top: 0.45rem;">Run <code>${escapeHtml(run.id)}</code> ingested at ${escapeHtml(new Date(run.ingestedAt).toLocaleString())}.</p>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Seed</span><strong>${escapeHtml(metadata.seed ?? "—")}</strong></div>
+          <div class="detail-item"><span>Ticks</span><strong>${escapeHtml(metadata.tickCount ?? "—")}</strong></div>
+          <div class="detail-item"><span>Winner</span><strong>${escapeHtml(metadata.winnerTeam ?? "—")}</strong></div>
+          <div class="detail-item"><span>Entities</span><strong>${escapeHtml(metadata.entityCount ?? "—")}</strong></div>
+          <div class="detail-item"><span>Casualties</span><strong>${escapeHtml(metadata.casualtyCount ?? "—")}</strong></div>
+          <div class="detail-item"><span>Event count</span><strong>${escapeHtml(metadata.eventCount ?? "—")}</strong></div>
+        </div>
+        <div class="pill-row" style="margin-top: 1rem;">
+          ${(metadata.eventTypes || []).map((type) => `<span class="pill">${escapeHtml(type)}</span>`).join("") || '<span class="pill">No events</span>'}
+        </div>
+        <p style="margin-top: 1rem; color: var(--muted);">Search text</p>
+        <pre>${escapeHtml(metadata.searchableText || "")}</pre>
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-top:1rem; gap:1rem;">
+          <h3>Normalised events</h3>
+          <a href="${escapeHtml(replayLink)}" target="_blank" rel="noreferrer">Open raw replay JSON</a>
+        </div>
+        <div class="event-list">
+          ${events.map((event) => `
+            <div class="event-row">
+              <strong>${escapeHtml(event.type)}</strong>
+              <div class="event-meta">tick ${escapeHtml(event.tick)} · entity ${escapeHtml(event.entityId ?? "—")} → ${escapeHtml(event.targetId ?? "—")} · value ${escapeHtml(event.value ?? "—")}</div>
+            </div>
+          `).join("")}
+        </div>
+        <h3 style="margin-top: 1rem;">Raw archive record</h3>
+        <pre>${escapeHtml(JSON.stringify(run, null, 2))}</pre>
+      `;
+    }
+
+    async function loadRunDetail(runId) {
+      if (!runId) return;
+      elements.detailPane.innerHTML = '<div class="loading">Loading run detail…</div>';
+      try {
+        const run = await fetchJson(`/runs/${runId}`);
+        renderDetail(run);
+      } catch (error) {
+        elements.detailPane.innerHTML = `<div class="error">Failed to load run detail: ${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    elements.searchButton.addEventListener("click", loadRuns);
+    elements.resetButton.addEventListener("click", () => {
+      elements.search.value = "";
+      elements.scenarioFilter.value = "";
+      elements.winnerFilter.value = "";
+      elements.minTicks.value = "";
+      elements.maxTicks.value = "";
+      elements.seedFilter.value = "";
+      loadRuns();
+    });
+
+    [elements.search, elements.minTicks, elements.maxTicks, elements.seedFilter].forEach((node) => {
+      node.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") loadRuns();
+      });
+    });
+    [elements.apiBase, elements.scenarioFilter, elements.winnerFilter].forEach((node) => {
+      node.addEventListener("change", loadRuns);
+    });
+
+    loadRuns();
+  </script>
+</body>
+</html>

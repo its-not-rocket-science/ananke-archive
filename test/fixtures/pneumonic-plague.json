@@ -1,0 +1,46 @@
+{
+  "scenario": "Pneumonic Plague",
+  "worldSeed": 7,
+  "metadata": {
+    "notes": "Disease spread stress test"
+  },
+  "initialState": {
+    "tick": 0,
+    "seed": 7,
+    "entities": [
+      { "id": 10, "name": "Carrier Zero", "team": "village", "alive": true },
+      { "id": 11, "name": "Villager One", "team": "village", "alive": true },
+      { "id": 12, "name": "Villager Two", "team": "village", "alive": true }
+    ]
+  },
+  "frames": [
+    {
+      "tick": 4,
+      "trace": [
+        { "kind": "Disease", "tick": 4, "entityId": 10, "targetId": 11, "value": 0.9 },
+        { "kind": "Disease", "tick": 4, "entityId": 10, "targetId": 12, "value": 0.8 }
+      ],
+      "snapshot": {
+        "entities": [
+          { "id": 10, "name": "Carrier Zero", "team": "village", "alive": true },
+          { "id": 11, "name": "Villager One", "team": "village", "alive": true },
+          { "id": 12, "name": "Villager Two", "team": "village", "alive": true }
+        ]
+      }
+    },
+    {
+      "tick": 8,
+      "trace": [
+        { "kind": "Death", "tick": 8, "entityId": 11 },
+        { "kind": "Death", "tick": 8, "entityId": 12 }
+      ],
+      "snapshot": {
+        "entities": [
+          { "id": 10, "name": "Carrier Zero", "team": "village", "alive": true },
+          { "id": 11, "name": "Villager One", "team": "village", "alive": false },
+          { "id": 12, "name": "Villager Two", "team": "village", "alive": false }
+        ]
+      }
+    }
+  ]
+}
