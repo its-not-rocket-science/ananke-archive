@@ -11,7 +11,7 @@
     "test": "node test/server.test.js"
   },
   "dependencies": {
-    "@its-not-rocket-science/ananke": "^0.1.3"
+    "@its-not-rocket-science/ananke": "^0.1.4"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
