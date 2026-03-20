@@ -5,9 +5,10 @@
   "description": "REST API archive of Ananke simulation runs and validation results",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "build": "tsc"
+    "build": "node --check src/server.js",
+    "test": "node test/server.test.js"
   },
   "dependencies": {
     "@its-not-rocket-science/ananke": "^0.1.1"
